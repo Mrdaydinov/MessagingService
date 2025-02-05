@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сообщения в реальном времени</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #messages {
+            list-style-type: none;
+            padding: 0;
+        }
+
+            #messages li {
+                padding: 5px;
+                border-bottom: 1px solid #ddd;
+            }
+    </style>
+</head>
+<body>
+    <h1>Сообщения в реальном времени</h1>
+    <ul id="messages"></ul>
+
+    <script>
+        const ws = new WebSocket(`wss://${location.host}/ws`);
+
+        ws.onopen = () => {
+            console.log('WebSocket подключен');
+        };
+
+        ws.onmessage = (event) => {
+            const messageData = JSON.parse(event.data);
+            const createdAt = new Date(messageData.CreatedAt).toLocaleString();
+
+            const li = document.createElement('li');
+            li.textContent = `[${createdAt}] №${messageData.SequenceNumber}: ${messageData.Content}`;
+            document.getElementById('messages').appendChild(li);
+        };
+
+        ws.onerror = (error) => {
+            console.error('WebSocket ошибка:', error);
+        };
+
+        ws.onclose = () => {
+            console.log('WebSocket отключен');
+        };
+    </script>
+</body>
+</html>

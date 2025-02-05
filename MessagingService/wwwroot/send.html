@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отправка сообщений</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        label, input, textarea {
+            display: block;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Отправка сообщений</h1>
+    <form id="sendForm">
+        <label for="content">Сообщение (до 128 символов):</label>
+        <textarea id="content" name="content" maxlength="128" required></textarea>
+
+        <label for="sequenceNumber">Порядковый номер:</label>
+        <input type="number" id="sequenceNumber" name="sequenceNumber" required>
+
+        <button type="submit">Отправить</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('sendForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const content = document.getElementById('content').value;
+            const sequenceNumber = parseInt(document.getElementById('sequenceNumber').value, 10);
+            const resultDiv = document.getElementById('result');
+
+            try {
+                const response = await fetch('/api/message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content, sequenceNumber })
+                });
+
+                if (response.ok) {
+                    resultDiv.textContent = 'Сообщение успешно отправлено!';
+                } else {
+                    const errorText = await response.text();
+                    resultDiv.textContent = 'Ошибка: ' + errorText;
+                }
+            } catch (error) {
+                resultDiv.textContent = 'Ошибка сети: ' + error;
+            }
+        });
+    </script>
+</body>
+</html>

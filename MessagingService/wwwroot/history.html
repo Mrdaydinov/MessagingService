@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>История сообщений за 10 минут</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #messages {
+            list-style-type: none;
+            padding: 0;
+        }
+
+            #messages li {
+                padding: 5px;
+                border-bottom: 1px solid #ddd;
+            }
+    </style>
+</head>
+<body>
+    <h1>История сообщений за последние 10 минут</h1>
+    <button id="loadBtn">Загрузить сообщения</button>
+    <ul id="messages"></ul>
+
+    <script>
+        document.getElementById('loadBtn').addEventListener('click', async () => {
+            try {
+                const now = new Date();
+                const from = new Date(now.getTime() - 600000);
+                const to = now;
+
+                const response = await fetch(`/api/message/range?from=${from.toISOString()}&to=${to.toISOString()}`);
+                if (response.ok) {
+                    const messages = await response.json();
+                    const messagesList = document.getElementById('messages');
+                    messagesList.innerHTML = '';
+                    messages.forEach(msg => {
+                        const li = document.createElement('li');
+                        li.textContent = `[${new Date(msg.createdAt).toLocaleString()}] №${msg.sequenceNumber}: ${msg.content}`;
+                        messagesList.appendChild(li);
+                    });
+                } else {
+                    alert('Ошибка при загрузке сообщений');
+                }
+            } catch (error) {
+                alert('Ошибка сети: ' + error);
+            }
+        });
+    </script>
+</body>
+</html>
